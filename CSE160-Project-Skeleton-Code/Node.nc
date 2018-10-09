@@ -35,6 +35,8 @@ module Node{
 
 implementation{
 
+   int[][] routingInfo = new int[19][3]; 
+
    pack sendPackage;
    pack replyPackage;
 
@@ -46,7 +48,7 @@ implementation{
 
 
    uint16_t seqCounter = 1;
-   uint16_t sequence = 0;
+   uint16_t seq = 0;
    uint16_t replySeq = 0;
    uint32_t start, offset;
    neighbor *currentNeighbor;
@@ -81,7 +83,7 @@ implementation{
    uint16_t i = 0;
    uint16_t list = call nodesVisited.size();
 
-  makePack(&sendPackage, TOS_NODE_ID, TOS_NODE_ID, 1, 0, sequence++, "HI NEIGHBOR", PACKET_MAX_PAYLOAD_SIZE);
+  makePack(&sendPackage, TOS_NODE_ID, TOS_NODE_ID, 1, 0, seq++, "HI NEIGHBOR", PACKET_MAX_PAYLOAD_SIZE);
   call Sender.send(sendPackage, AM_BROADCAST_ADDR);
 
      for(i = 0; i < list;i++){
@@ -143,7 +145,7 @@ implementation{
                        }
                        if (has == 0)
                            call ListOfNeighbors.pushback(myMsg -> src);
-                           dbg(NEIGHBOR_CHANNEL, "There's a neighbor\n");
+                           dbg(NEIGHBOR_CHANNEL, "There's a neighbor\n")
 
                    }
                    call nodesVisited.pushback(*myMsg);
@@ -161,7 +163,7 @@ implementation{
                else { // myMsg -> dest == TOS_NODE_ID
                    dbg(GENERAL_CHANNEL, "Packet Recieved: %s\n", myMsg -> payload);
                    call nodesVisited.pushback(*myMsg);
-                   makePack(&sendPackage, TOS_NODE_ID, myMsg -> src, MAX_TTL, 1, sequence++, "Thank You.", PACKET_MAX_PAYLOAD_SIZE);
+                   makePack(&sendPackage, TOS_NODE_ID, myMsg -> src, MAX_TTL, 1, seq++, "Thank You.", PACKET_MAX_PAYLOAD_SIZE);
                    call Sender.send(sendPackage, AM_BROADCAST_ADDR);
                }
                return msg;
@@ -172,9 +174,9 @@ implementation{
 
 
 
-   event void CommandHandler.ping(uint16_t dest, uint8_t *payload){
+   event void CommandHandler.ping(uint16_t destination, uint8_t *payload){
       dbg(GENERAL_CHANNEL, "PING EVENT \n");
-      makePack(&sendPackage, TOS_NODE_ID, dest, 10, 0, sequence++, payload, PACKET_MAX_PAYLOAD_SIZE);
+      makePack(&sendPackage, TOS_NODE_ID, destination, 10, 0, 0, payload, PACKET_MAX_PAYLOAD_SIZE);
       call Sender.send(sendPackage, AM_BROADCAST_ADDR);
    }
 
